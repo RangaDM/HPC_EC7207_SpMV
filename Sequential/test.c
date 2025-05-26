@@ -349,6 +349,7 @@ int main()
         printf("Invalid choice. Please enter 0 or 1.\n");
         return 1;
     }
+    // Free memory for the coefficient matrix and constants vector
 
     return 0;
 }
