@@ -3,147 +3,339 @@
 
 int main()
 {
-    printf("Equation method or matrix multiplication?\n");
+    printf("Select method:\n");
+    printf("1 : Solving a system of equations.\n");
+    printf("2 : Matrix multiplication.\n");
     int choice1;
     scanf("%d", &choice1);
 
-    if (choice1 == 0)
+    if (choice1 == 1)
     {
-        printf("wait for the next version of the program.\n");
-    }
-    else if (choice1 == 1)
-    {
-        printf("Automatically fill the matrix with random numbers? yes == 1.\n");
+        printf("You chose: System of equations.\n");
+        printf("Enter the number of equations (variables): ");
         int n;
         scanf("%d", &n);
 
-        if (n == 0)
+        int **coeff = (int **)malloc(n * sizeof(int *));
+        for (int i = 0; i < n; i++)
         {
-            int n, i, j, k;
-            printf("Enter the size of the matrix (n for n x n): ");
-            scanf("%d", &n);
+            coeff[i] = (int *)malloc(n * sizeof(int));
+        }
+        int *constants = (int *)malloc(n * sizeof(int));
 
-            // Dynamic allocation
-            int **a = (int **)malloc(n * sizeof(int *));
-            int **b = (int **)malloc(n * sizeof(int *));
-            int **result = (int **)malloc(n * sizeof(int *));
-            for (i = 0; i < n; i++)
+        printf("Equation format : aX + bY + cZ = d\n");
+        printf("Enter the coefficients and the constant term for each equation.\n");
+        printf("For each equation, enter %d coefficients followed by the constant term:\n", n);
+        for (int i = 0; i < n; i++)
+        {
+            printf("Equation %d:\n", i + 1);
+            for (int j = 0; j < n; j++)
             {
-                a[i] = (int *)malloc(n * sizeof(int));
-                b[i] = (int *)malloc(n * sizeof(int));
-                result[i] = (int *)calloc(n, sizeof(int));
+                printf("  Coefficient of variable %d: ", j + 1);
+                scanf("%d", &coeff[i][j]);
+            }
+            printf("  Constant term: ");
+            scanf("%d", &constants[i]);
+        }
+
+        printf("\nCoefficient matrix:\n");
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                printf("%d ", coeff[i][j]);
+            }
+            printf("\n");
+        }
+
+        printf("Constants vector:\n");
+        for (int i = 0; i < n; i++)
+        {
+            printf("%d\n", constants[i]);
+        }
+
+        {
+            printf("\nSolving system using LU factorization...\n");
+
+            // Convert the coefficient matrix and constants vector to double arrays
+            double **A = malloc(n * sizeof(double *));
+            for (int i = 0; i < n; i++)
+            {
+                A[i] = malloc(n * sizeof(double));
+                for (int j = 0; j < n; j++)
+                {
+                    A[i][j] = coeff[i][j];
+                }
+            }
+            double *b = malloc(n * sizeof(double));
+            for (int i = 0; i < n; i++)
+            {
+                b[i] = constants[i];
             }
 
-            printf("Enter elements of first %dx%d matrix:\n", n, n);
-            for (i = 0; i < n; i++)
+            // Allocate memory for L and U matrices
+            double **L = malloc(n * sizeof(double *));
+            double **U = malloc(n * sizeof(double *));
+            for (int i = 0; i < n; i++)
             {
-                for (j = 0; j < n; j++)
+                L[i] = calloc(n, sizeof(double));
+                U[i] = calloc(n, sizeof(double));
+            }
+
+            // Perform LU Decomposition without pivoting
+            for (int i = 0; i < n; i++)
+            {
+                // Compute U's row
+                for (int j = i; j < n; j++)
                 {
-                    printf("a[%d][%d]: ", i, j);
-                    scanf("%d", &a[i][j]);
+                    double sum = 0;
+                    for (int k = 0; k < i; k++)
+                    {
+                        sum += L[i][k] * U[k][j];
+                    }
+                    U[i][j] = A[i][j] - sum;
+                }
+
+                // Set the diagonal of L to 1
+                L[i][i] = 1.0;
+
+                // Compute L's column
+                for (int j = i + 1; j < n; j++)
+                {
+                    double sum = 0;
+                    for (int k = 0; k < i; k++)
+                    {
+                        sum += L[j][k] * U[k][i];
+                    }
+                    if (U[i][i] == 0)
+                    {
+                        printf("Error: Division by zero in LU factorization.\n");
+                        exit(1);
+                    }
+                    L[j][i] = (A[j][i] - sum) / U[i][i];
                 }
             }
 
-            printf("Enter elements of second %dx%d matrix:\n", n, n);
-            for (i = 0; i < n; i++)
+            // Print L and U matrices
+
+            // printf("\nL matrix:\n");
+            // for (int i = 0; i < n; i++)
+            // {
+            //     for (int j = 0; j < n; j++)
+            //     {
+            //         printf("%lf ", L[i][j]);
+            //     }
+            //     printf("\n");
+            // }
+
+            // printf("\nU matrix:\n");
+            // for (int i = 0; i < n; i++)
+            // {
+            //     for (int j = 0; j < n; j++)
+            //     {
+            //         printf("%lf ", U[i][j]);
+            //     }
+            //     printf("\n");
+            // }
+
+            // Forward substitution: solve Ly = b
+            double *y = malloc(n * sizeof(double));
+            for (int i = 0; i < n; i++)
             {
-                for (j = 0; j < n; j++)
+                double sum = 0;
+                for (int j = 0; j < i; j++)
+                {
+                    sum += L[i][j] * y[j];
+                }
+                y[i] = b[i] - sum;
+            }
+
+            // Backward substitution: solve Ux = y
+            double *x = malloc(n * sizeof(double));
+            for (int i = n - 1; i >= 0; i--)
+            {
+                double sum = 0;
+                for (int j = i + 1; j < n; j++)
+                {
+                    sum += U[i][j] * x[j];
+                }
+                if (U[i][i] == 0)
+                {
+                    printf("Error: Division by zero in backward substitution.\n");
+                    exit(1);
+                }
+                x[i] = (y[i] - sum) / U[i][i];
+            }
+
+            // Print the solution
+            printf("\nSolution:\n");
+            for (int i = 0; i < n; i++)
+            {
+                printf("Variable %d: %lf\n", i + 1, x[i]);
+            }
+
+            // Free allocated memory
+            for (int i = 0; i < n; i++)
+            {
+                free(A[i]);
+                free(L[i]);
+                free(U[i]);
+            }
+            free(A);
+            free(L);
+            free(U);
+            free(b);
+            free(y);
+            free(x);
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            free(coeff[i]);
+        }
+        free(coeff);
+        free(constants);
+    }
+    else if (choice1 == 2)
+    {
+        printf("You chose: Matrix multiplication.\n\n");
+        printf("Select method:\n");
+        printf("1 : Manually fill.\n");
+        printf("2 : Automatically fill.\n");
+        int n;
+        scanf("%d", &n);
+
+        if (n == 1)
+        {
+            int size, i, j;
+            printf("Enter the size of the vector and matrix (n for n x n): ");
+            scanf("%d", &size);
+
+            // Allocate vector a and matrix b
+            int *a = (int *)malloc(size * sizeof(int));
+            int **b = (int **)malloc(size * sizeof(int *));
+            int *result = (int *)calloc(size, sizeof(int));
+            for (i = 0; i < size; i++)
+            {
+                b[i] = (int *)malloc(size * sizeof(int));
+            }
+
+            printf("Enter elements of the vector (size %d):\n", size);
+            for (i = 0; i < size; i++)
+            {
+                printf("a[%d]: ", i);
+                scanf("%d", &a[i]);
+            }
+            printf("Vector a:\n");
+            for (i = 0; i < size; i++)
+            {
+                printf("%d ", a[i]);
+            }
+            printf("\n\n");
+
+            printf("Enter elements of the %dx%d matrix:\n", size, size);
+            for (i = 0; i < size; i++)
+            {
+                for (j = 0; j < size; j++)
                 {
                     printf("b[%d][%d]: ", i, j);
                     scanf("%d", &b[i][j]);
                 }
             }
 
-            // Matrix multiplication
-            for (i = 0; i < n; i++)
+            printf("Matrix b:\n");
+            for (i = 0; i < size; i++)
             {
-                for (j = 0; j < n; j++)
+                for (j = 0; j < size; j++)
                 {
-                    for (k = 0; k < n; k++)
-                    {
-                        result[i][j] += a[i][k] * b[k][j];
-                    }
-                }
-            }
-
-            printf("Resultant matrix:\n");
-            for (i = 0; i < n; i++)
-            {
-                for (j = 0; j < n; j++)
-                {
-                    printf("%d ", result[i][j]);
+                    printf("%d ", b[i][j]);
                 }
                 printf("\n");
             }
+            printf("\n");
+
+            // Vector-matrix multiplication: result = b * a
+            for (i = 0; i < size; i++)
+            {
+                for (j = 0; j < size; j++)
+                {
+                    result[i] += a[j] * b[j][i];
+                }
+            }
+
+            printf("Resultant vector:\n");
+            for (i = 0; i < size; i++)
+            {
+                printf("%d ", result[i]);
+            }
+            printf("\n");
 
             // Free memory
-            for (i = 0; i < n; i++)
-            {
-                free(a[i]);
-                free(b[i]);
-                free(result[i]);
-            }
             free(a);
+            for (i = 0; i < size; i++)
+            {
+                free(b[i]);
+            }
             free(b);
             free(result);
         }
-        else if (n == 1)
+        else if (n == 2)
         {
-            int n, i, j, k;
-            printf("Enter the size of the matrix (n for n x n): ");
-            scanf("%d", &n);
+            int size, i, j;
+            printf("Enter the size of the vector and matrix (n for n x n): ");
+            scanf("%d", &size);
 
-            // Dynamic allocation
-            int **a = (int **)malloc(n * sizeof(int *));
-            int **b = (int **)malloc(n * sizeof(int *));
-            int **result = (int **)malloc(n * sizeof(int *));
-            for (i = 0; i < n; i++)
+            // Allocate vector a and matrix b
+            int *a = (int *)malloc(size * sizeof(int));
+            int **b = (int **)malloc(size * sizeof(int *));
+            int *result = (int *)calloc(size, sizeof(int));
+            for (i = 0; i < size; i++)
             {
-                a[i] = (int *)malloc(n * sizeof(int));
-                b[i] = (int *)malloc(n * sizeof(int));
-                result[i] = (int *)calloc(n, sizeof(int));
+                b[i] = (int *)malloc(size * sizeof(int));
             }
 
-            // Fill matrices with random numbers
-            for (i = 0; i < n; i++)
+            // Fill vector and matrix with random numbers
+            printf("Vector a (randomly filled):\n");
+            for (i = 0; i < size; i++)
             {
-                for (j = 0; j < n; j++)
+                a[i] = rand() % 10;
+                printf("%d ", a[i]);
+            }
+            printf("\n");
+
+            printf("Matrix b (randomly filled):\n");
+            for (i = 0; i < size; i++)
+            {
+                for (j = 0; j < size; j++)
                 {
-                    a[i][j] = rand() % 10; // Random numbers between 0 and 9
                     b[i][j] = rand() % 10;
-                }
-            }
-
-            // Matrix multiplication
-            for (i = 0; i < n; i++)
-            {
-                for (j = 0; j < n; j++)
-                {
-                    for (k = 0; k < n; k++)
-                    {
-                        result[i][j] += a[i][k] * b[k][j];
-                    }
-                }
-            }
-
-            printf("Resultant matrix:\n");
-            for (i = 0; i < n; i++)
-            {
-                for (j = 0; j < n; j++)
-                {
-                    printf("%d ", result[i][j]);
+                    printf("%d ", b[i][j]);
                 }
                 printf("\n");
             }
 
-            // Free memory
-            for (i = 0; i < n; i++)
+            // Vector-matrix multiplication: result = a * b
+            for (i = 0; i < size; i++)
             {
-                free(a[i]);
-                free(b[i]);
-                free(result[i]);
+                for (j = 0; j < size; j++)
+                {
+                    result[i] += a[j] * b[j][i];
+                }
             }
+
+            printf("Resultant vector (a * b) :\n");
+            for (i = 0; i < size; i++)
+            {
+                printf("%d  ", result[i]);
+            }
+            printf("\n");
+
+            // Free memory
             free(a);
+            for (i = 0; i < size; i++)
+            {
+                free(b[i]);
+            }
             free(b);
             free(result);
         }
