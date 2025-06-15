@@ -1,34 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32
-    #include <windows.h>
-#else
-    #include <time.h>
-    #include <sys/time.h>
-#endif
-
-// Function to get current time in seconds
-double get_time() {
-    #ifdef _WIN32
-        LARGE_INTEGER frequency, start;
-        QueryPerformanceFrequency(&frequency);
-        QueryPerformanceCounter(&start);
-        return (double)start.QuadPart / frequency.QuadPart;
-    #else
-        struct timespec start;
-        clock_gettime(CLOCK_MONOTONIC, &start);
-        return start.tv_sec + start.tv_nsec / 1e9;
-    #endif
-}
+#include <omp.h> // Include OpenMP header for parallel processing
 
 int main()
 {
-    double start_time = get_time();  // Start timing
     printf("Select method:\n");
     printf("1 : Solving a system of equations.\n");
     printf("2 : Matrix multiplication.\n");
     int choice1;
     scanf("%d", &choice1);
+    
+    // omp_set_num_threads(5); // Set number of Threads at Runtime
 
     if (choice1 == 1)
     // Chose to solve a system of equations
@@ -105,10 +87,11 @@ int main()
                 U[i] = calloc(n, sizeof(double));
             }
 
-            // Perform LU Decomposition without pivoting
+            // Parallelize LU Factorization
             for (int i = 0; i < n; i++)
             {
-                // Compute U's row
+                #pragma omp parallel for shared(U, L, A, i, n) default(none)
+                // Compute U's row (parallel over j)
                 for (int j = i; j < n; j++)
                 {
                     double sum = 0;
@@ -119,21 +102,16 @@ int main()
                     U[i][j] = A[i][j] - sum;
                 }
 
-                // Set the diagonal of L to 1
                 L[i][i] = 1.0;
 
-                // Compute L's column
+#pragma omp parallel for shared(L, U, A, i, n) default(none)
+                // Compute L's column (parallel over j)
                 for (int j = i + 1; j < n; j++)
                 {
                     double sum = 0;
                     for (int k = 0; k < i; k++)
                     {
                         sum += L[j][k] * U[k][i];
-                    }
-                    if (U[i][i] == 0)
-                    {
-                        printf("Error: Division by zero in LU factorization.\n");
-                        exit(1);
                     }
                     L[j][i] = (A[j][i] - sum) / U[i][i];
                 }
@@ -175,17 +153,14 @@ int main()
 
             // Backward substitution: solve Ux = y
             double *x = malloc(n * sizeof(double));
+            // Parallelize Forward and Backward Substitution
             for (int i = n - 1; i >= 0; i--)
             {
                 double sum = 0;
+#pragma omp parallel for reduction(+ : sum) default(none) shared(i, x, U, n)
                 for (int j = i + 1; j < n; j++)
                 {
                     sum += U[i][j] * x[j];
-                }
-                if (U[i][i] == 0)
-                {
-                    printf("Error: Division by zero in backward substitution.\n");
-                    exit(1);
                 }
                 x[i] = (y[i] - sum) / U[i][i];
             }
@@ -277,10 +252,11 @@ int main()
             }
             printf("\n");
 
-            // Vector-matrix multiplication: result = b * a
-            for (i = 0; i < size; i++)
+            // Vector-matrix multiplication: result = a * b
+            #pragma omp parallel for private(j) shared(a, b, result, size) default(none)
+            for (int i = 0; i < size; i++)
             {
-                for (j = 0; j < size; j++)
+                for (int j = 0; j < size; j++)
                 {
                     result[i] += a[j] * b[j][i];
                 }
@@ -318,7 +294,7 @@ int main()
             }
 
             // Fill vector and matrix with random numbers
-            printf("Vector a (randomly filled):\n");
+            printf("\nVector a (randomly filled):\n");
             for (i = 0; i < size; i++)
             {
                 a[i] = rand() % 10;
@@ -346,7 +322,7 @@ int main()
                 }
             }
 
-            printf("\nResultant vector (a * b) :\n");
+            printf("\nResultant vector (a * b) : ");
             for (i = 0; i < size; i++)
             {
                 printf("%d  ", result[i]);
@@ -372,11 +348,9 @@ int main()
         printf("Invalid choice. Please enter 0 or 1.\n");
         return 1;
     }
-    
+
     // Performance measurement
-    double end_time = get_time();
-    double execution_time = end_time - start_time;
-    printf("\nTime taken for the operation: %.6f seconds\n", execution_time);
-    
+    printf("Time taken for the operation: \n");
+
     return 0;
 }
