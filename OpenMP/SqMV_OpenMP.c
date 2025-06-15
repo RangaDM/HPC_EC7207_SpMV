@@ -1,15 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h> // Include OpenMP header for parallel processing
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <time.h>
+#include <sys/time.h>
+#endif
+
+// Function to get current time in seconds
+double get_time()
+{
+#ifdef _WIN32
+    LARGE_INTEGER frequency, start;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start);
+    return (double)start.QuadPart / frequency.QuadPart;
+#else
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    return start.tv_sec + start.tv_nsec / 1e9;
+#endif
+}
 
 int main()
 {
+    double start_time = get_time(); // Start timing
+
     printf("Select method:\n");
     printf("1 : Solving a system of equations.\n");
     printf("2 : Matrix multiplication.\n");
     int choice1;
     scanf("%d", &choice1);
-    
+
     // omp_set_num_threads(5); // Set number of Threads at Runtime
 
     if (choice1 == 1)
@@ -90,7 +113,7 @@ int main()
             // Parallelize LU Factorization
             for (int i = 0; i < n; i++)
             {
-                #pragma omp parallel for shared(U, L, A, i, n) default(none)
+#pragma omp parallel for shared(U, L, A, i, n) default(none)
                 // Compute U's row (parallel over j)
                 for (int j = i; j < n; j++)
                 {
@@ -252,8 +275,8 @@ int main()
             }
             printf("\n");
 
-            // Vector-matrix multiplication: result = a * b
-            #pragma omp parallel for private(j) shared(a, b, result, size) default(none)
+// Vector-matrix multiplication: result = a * b
+#pragma omp parallel for private(j) shared(a, b, result, size) default(none)
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
@@ -350,7 +373,11 @@ int main()
     }
 
     // Performance measurement
-    printf("Time taken for the operation: \n");
+    double end_time = get_time();
+    double execution_time = end_time - start_time;
+    printf("\nTime taken for the operation: %.6f seconds\n", execution_time);
 
     return 0;
 }
+
+// Compile with: gcc -fopenmp -o SqMV_OpenMP SqMV_OpenMP.c

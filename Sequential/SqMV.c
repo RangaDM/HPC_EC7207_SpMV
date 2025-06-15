@@ -1,29 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef _WIN32
-    #include <windows.h>
+#include <windows.h>
 #else
-    #include <time.h>
-    #include <sys/time.h>
+#include <time.h>
+#include <sys/time.h>
 #endif
 
 // Function to get current time in seconds
-double get_time() {
-    #ifdef _WIN32
-        LARGE_INTEGER frequency, start;
-        QueryPerformanceFrequency(&frequency);
-        QueryPerformanceCounter(&start);
-        return (double)start.QuadPart / frequency.QuadPart;
-    #else
-        struct timespec start;
-        clock_gettime(CLOCK_MONOTONIC, &start);
-        return start.tv_sec + start.tv_nsec / 1e9;
-    #endif
+double get_time()
+{
+#ifdef _WIN32
+    LARGE_INTEGER frequency, start;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start);
+    return (double)start.QuadPart / frequency.QuadPart;
+#else
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    return start.tv_sec + start.tv_nsec / 1e9;
+#endif
 }
 
 int main()
 {
-    double start_time = get_time();  // Start timing
+    double start_time = get_time(); // Start timing
     printf("Select method:\n");
     printf("1 : Solving a system of equations.\n");
     printf("2 : Matrix multiplication.\n");
@@ -372,11 +373,11 @@ int main()
         printf("Invalid choice. Please enter 0 or 1.\n");
         return 1;
     }
-    
+
     // Performance measurement
     double end_time = get_time();
     double execution_time = end_time - start_time;
     printf("\nTime taken for the operation: %.6f seconds\n", execution_time);
-    
+
     return 0;
 }
