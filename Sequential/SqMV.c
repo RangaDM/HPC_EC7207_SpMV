@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32
+#ifdef _WIN32 // Check if the OS is Windows
 #include <windows.h> // QueryPerformanceFrequency, QueryPerformanceCounter
 #else
 #include <time.h> // Basic time library
@@ -24,13 +24,14 @@ double get_time()
 
 int main()
 {
-    // double start_time = get_time(); // Start timing
     printf("Select method:\n");
     printf("1 : Solving a system of equations.\n");
     printf("2 : Matrix multiplication.\n");
     int choice1;
     scanf("%d", &choice1);
 
+
+    // ************* Part 1 : Solving a system of equations *************
     if (choice1 == 1)
     // Chose to solve a system of equations
     {
@@ -227,6 +228,11 @@ int main()
         free(coeff);
         free(constants);
     }
+
+    
+    
+    
+    // ************* Part 2 : Matrix multiplication *************
     else if (choice1 == 2)
     {
         printf("You chose: Matrix multiplication.\n\n");
@@ -236,7 +242,9 @@ int main()
         int n;
         scanf("%d", &n);
 
-        // Matrix multiplication : Manually fill
+        
+        
+        // ************* Part 2.1 : Manually fill *************
         if (n == 1)
         {
             int size, i, j;
@@ -317,7 +325,10 @@ int main()
             free(b);
             free(result);
         }
-        // Matrix multiplication : Automatically fill
+
+        
+        
+        // ************* Part 2.2 : Automatically fill *************
         else if (n == 2)
         {
             int size, i, j;

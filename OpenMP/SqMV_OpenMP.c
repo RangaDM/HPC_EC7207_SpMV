@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h> // Include OpenMP header for parallel processing
-#ifdef _WIN32
+#ifdef _WIN32    // Check if the OS is Windows
 #include <windows.h>
 #else
 #include <time.h>
@@ -25,8 +25,6 @@ double get_time()
 
 int main()
 {
-    double start_time = get_time(); // Start timing
-
     printf("Select method:\n");
     printf("1 : Solving a system of equations.\n");
     printf("2 : Matrix multiplication.\n");
@@ -35,6 +33,7 @@ int main()
 
     // omp_set_num_threads(5); // Set number of Threads at Runtime
 
+    // ************* Part 1 : Solving a system of equations *************
     if (choice1 == 1) // Chose to solve a system of equations
     {
         printf("You chose: System of equations.\n");
@@ -168,6 +167,7 @@ int main()
             for (int i = 0; i < n; i++)
             {
                 double sum = 0;
+#pragma omp parallel for reduction(+ : sum) shared(L, y, i) default(none)
                 for (int j = 0; j < i; j++)
                 {
                     sum += L[i][j] * y[j];
@@ -222,6 +222,8 @@ int main()
         free(coeff);
         free(constants);
     }
+
+    // ************* Part 2 : Matrix multiplication *************
     else if (choice1 == 2) // Matrix multiplication
     {
         printf("You chose: Matrix multiplication.\n\n");
@@ -231,6 +233,7 @@ int main()
         int n;
         scanf("%d", &n);
 
+        // ************* Part 2.1 : Manually fill *************
         if (n == 1) // Manually fill
         {
             int size, i, j;
@@ -312,6 +315,8 @@ int main()
             free(b);
             free(result);
         }
+
+        // ************* Part 2.2 : Automatically fill *************
         else if (n == 2) // Automatically fill
         {
             int size, i, j;
@@ -388,7 +393,7 @@ int main()
         printf("Invalid choice. Please enter 0 or 1.\n");
         return 1;
     }
-    
+
     return 0;
 }
 
