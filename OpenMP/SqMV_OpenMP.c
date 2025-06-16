@@ -189,8 +189,6 @@ int main()
                 x[i] = (y[i] - sum) / U[i][i];
             }
 
-            double end_time = get_time();
-
             // Print the solution
             printf("\nSolution:\n");
             for (int i = 0; i < n; i++)
@@ -198,7 +196,9 @@ int main()
                 printf("Variable %d: %lf\n", i + 1, x[i]);
             }
 
-            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
+            double end_time = get_time();
+            double execution_time = (end_time - start_time) * 1000.0; // Convert to milliseconds
+            printf("\nTime taken for the operation: %.3f milliseconds\n", execution_time);
 
             // Free allocated memory
             for (int i = 0; i < n; i++)
@@ -295,8 +295,6 @@ int main()
                 }
             }
 
-            double end_time = get_time();
-
             printf("Resultant vector:\n");
             for (i = 0; i < size; i++)
             {
@@ -304,7 +302,9 @@ int main()
             }
             printf("\n");
 
-            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
+            double end_time = get_time();
+            double execution_time = (end_time - start_time) * 1000.0; // Convert to milliseconds
+            printf("\nTime taken for the operation: %.3f milliseconds\n", execution_time);
 
             // Free memory
             free(a);
@@ -363,8 +363,6 @@ int main()
                 }
             }
 
-            double end_time = get_time();
-
             printf("\nResultant vector (a * b) : ");
             for (i = 0; i < size; i++)
             {
@@ -372,7 +370,9 @@ int main()
             }
             printf("\n");
 
-            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
+            double end_time = get_time();
+            double execution_time = (end_time - start_time) * 1000.0; // Convert to milliseconds
+            printf("\nTime taken for the operation: %.3f milliseconds\n", execution_time);
 
             // Free memory
             free(a);

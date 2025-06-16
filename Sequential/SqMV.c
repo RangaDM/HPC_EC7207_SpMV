@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef _WIN32 // Check if the OS is Windows
+#ifdef _WIN32        // Check if the OS is Windows
 #include <windows.h> // QueryPerformanceFrequency, QueryPerformanceCounter
 #else
-#include <time.h> // Basic time library
+#include <time.h>     // Basic time library
 #include <sys/time.h> // Precise time library, get_time, clock_gettime
 #endif
 
@@ -16,8 +16,8 @@ double get_time()
     QueryPerformanceCounter(&start);
     return (double)start.QuadPart / frequency.QuadPart; // return the time in seconds
 #else
-    struct timespec start; // struct to store the time
-    clock_gettime(CLOCK_MONOTONIC, &start); // get the time
+    struct timespec start;                     // struct to store the time
+    clock_gettime(CLOCK_MONOTONIC, &start);    // get the time
     return start.tv_sec + start.tv_nsec / 1e9; // return the time in seconds
 #endif
 }
@@ -29,7 +29,6 @@ int main()
     printf("2 : Matrix multiplication.\n");
     int choice1;
     scanf("%d", &choice1);
-
 
     // ************* Part 1 : Solving a system of equations *************
     if (choice1 == 1)
@@ -204,7 +203,9 @@ int main()
                 printf("Variable %d: %lf\n", i + 1, x[i]);
             }
 
-            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
+            // Performance measurement
+            double execution_time = (end_time - start_time) * 1000.0; // Convert to milliseconds
+            printf("Time taken for the operation: %.3f milliseconds\n", execution_time);
 
             // Free allocated memory
             for (int i = 0; i < n; i++)
@@ -229,9 +230,6 @@ int main()
         free(constants);
     }
 
-    
-    
-    
     // ************* Part 2 : Matrix multiplication *************
     else if (choice1 == 2)
     {
@@ -242,8 +240,6 @@ int main()
         int n;
         scanf("%d", &n);
 
-        
-        
         // ************* Part 2.1 : Manually fill *************
         if (n == 1)
         {
@@ -314,7 +310,9 @@ int main()
             }
             printf("\n");
 
-            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
+            // Performance measurement
+            double execution_time = (end_time - start_time) * 1000.0; // Convert to milliseconds
+            printf("Time taken for the operation: %.3f milliseconds\n", execution_time);
 
             // Free memory
             free(a);
@@ -326,8 +324,6 @@ int main()
             free(result);
         }
 
-        
-        
         // ************* Part 2.2 : Automatically fill *************
         else if (n == 2)
         {
@@ -382,9 +378,11 @@ int main()
             {
                 printf("%d  ", result[i]);
             }
-            printf("\n");
+            printf("\n\n");
 
-            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
+            // Performance measurement
+            double execution_time = (end_time - start_time) * 1000.0; // Convert to milliseconds
+            printf("Time taken for the operation: %.3f milliseconds\n", execution_time);
 
             // Free memory
             free(a);
