@@ -100,6 +100,8 @@ int main()
                 b[i] = constants[i];
             }
 
+            double start_time = get_time();
+
             // Allocate memory for L and U matrices
             double **L = malloc(n * sizeof(double *));
             double **U = malloc(n * sizeof(double *));
@@ -187,12 +189,16 @@ int main()
                 x[i] = (y[i] - sum) / U[i][i];
             }
 
+            double end_time = get_time();
+
             // Print the solution
             printf("\nSolution:\n");
             for (int i = 0; i < n; i++)
             {
                 printf("Variable %d: %lf\n", i + 1, x[i]);
             }
+
+            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
 
             // Free allocated memory
             for (int i = 0; i < n; i++)
@@ -274,6 +280,8 @@ int main()
             }
             printf("\n");
 
+            double start_time = get_time();
+
 // Vector-matrix multiplication: result = a * b
 #pragma omp parallel for private(j) shared(a, b, result, size) default(none)
             for (int i = 0; i < size; i++)
@@ -284,12 +292,16 @@ int main()
                 }
             }
 
+            double end_time = get_time();
+
             printf("Resultant vector:\n");
             for (i = 0; i < size; i++)
             {
                 printf("%d ", result[i]);
             }
             printf("\n");
+
+            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
 
             // Free memory
             free(a);
@@ -335,6 +347,8 @@ int main()
                 printf("\n");
             }
 
+            double start_time = get_time();
+
             // Vector-matrix multiplication: result = a * b
             for (i = 0; i < size; i++)
             {
@@ -344,12 +358,16 @@ int main()
                 }
             }
 
+            double end_time = get_time();
+
             printf("\nResultant vector (a * b) : ");
             for (i = 0; i < size; i++)
             {
                 printf("%d  ", result[i]);
             }
             printf("\n");
+
+            printf("\nTime taken: %.6f seconds\n", end_time - start_time);
 
             // Free memory
             free(a);
@@ -370,12 +388,7 @@ int main()
         printf("Invalid choice. Please enter 0 or 1.\n");
         return 1;
     }
-
-    // Performance measurement
-    double end_time = get_time();
-    double execution_time = end_time - start_time;
-    printf("\nTime taken for the operation: %.6f seconds\n", execution_time);
-
+    
     return 0;
 }
 
