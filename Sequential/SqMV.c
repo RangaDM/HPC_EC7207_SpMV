@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef _WIN32
-#include <windows.h>
+#include <windows.h> // QueryPerformanceFrequency, QueryPerformanceCounter
 #else
-#include <time.h>
-#include <sys/time.h>
+#include <time.h> // Basic time library
+#include <sys/time.h> // Precise time library, get_time, clock_gettime
 #endif
 
 // Function to get current time in seconds
@@ -14,11 +14,11 @@ double get_time()
     LARGE_INTEGER frequency, start;
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&start);
-    return (double)start.QuadPart / frequency.QuadPart;
+    return (double)start.QuadPart / frequency.QuadPart; // return the time in seconds
 #else
-    struct timespec start;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    return start.tv_sec + start.tv_nsec / 1e9;
+    struct timespec start; // struct to store the time
+    clock_gettime(CLOCK_MONOTONIC, &start); // get the time
+    return start.tv_sec + start.tv_nsec / 1e9; // return the time in seconds
 #endif
 }
 
@@ -39,8 +39,9 @@ int main()
         int n;
         scanf("%d", &n);
 
-        // Dynamically allocate memory for the coefficient matrix and constants vector
-        int **coeff = (int **)malloc(n * sizeof(int *));
+        // Dynamically allocate memory (malloc) for the coefficient matrix and constants vector
+        int **coeff = (int **)malloc(n * sizeof(int *)); // coefficient matrix
+        // sizeof(int *) is the size of the pointer to an int
         for (int i = 0; i < n; i++)
         {
             coeff[i] = (int *)malloc(n * sizeof(int));
@@ -82,16 +83,16 @@ int main()
             printf("\nSolving system using LU factorization...\n");
 
             // Convert the coefficient matrix and constants vector to double arrays
-            double **A = malloc(n * sizeof(double *));
+            double **A = (double **)malloc(n * sizeof(double *));
             for (int i = 0; i < n; i++)
             {
-                A[i] = malloc(n * sizeof(double));
+                A[i] = (double *)malloc(n * sizeof(double));
                 for (int j = 0; j < n; j++)
                 {
                     A[i][j] = coeff[i][j];
                 }
             }
-            double *b = malloc(n * sizeof(double));
+            double *b = (double *)malloc(n * sizeof(double));
             for (int i = 0; i < n; i++)
             {
                 b[i] = constants[i];
@@ -201,8 +202,8 @@ int main()
             // Free allocated memory
             for (int i = 0; i < n; i++)
             {
-                free(A[i]);
-                free(L[i]);
+                free(A[i]); // for memory deallocation, free is used to free the memory allocated by malloc
+                free(L[i]); // include in stdlib.h
                 free(U[i]);
             }
             free(A);
@@ -215,7 +216,7 @@ int main()
 
         for (int i = 0; i < n; i++)
         {
-            free(coeff[i]);
+            free(coeff[i]); // deallocate the memory in row
         }
         free(coeff);
         free(constants);
@@ -229,6 +230,7 @@ int main()
         int n;
         scanf("%d", &n);
 
+        // Matrix multiplication : Manually fill
         if (n == 1)
         {
             int size, i, j;
@@ -303,6 +305,7 @@ int main()
             free(b);
             free(result);
         }
+        // Matrix multiplication : Automatically fill
         else if (n == 2)
         {
             int size, i, j;

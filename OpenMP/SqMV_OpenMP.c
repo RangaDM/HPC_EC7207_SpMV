@@ -35,8 +35,7 @@ int main()
 
     // omp_set_num_threads(5); // Set number of Threads at Runtime
 
-    if (choice1 == 1)
-    // Chose to solve a system of equations
+    if (choice1 == 1) // Chose to solve a system of equations
     {
         printf("You chose: System of equations.\n");
         printf("Enter the number of equations (variables): ");
@@ -217,7 +216,7 @@ int main()
         free(coeff);
         free(constants);
     }
-    else if (choice1 == 2)
+    else if (choice1 == 2) // Matrix multiplication
     {
         printf("You chose: Matrix multiplication.\n\n");
         printf("Select method:\n");
@@ -226,7 +225,7 @@ int main()
         int n;
         scanf("%d", &n);
 
-        if (n == 1)
+        if (n == 1) // Manually fill
         {
             int size, i, j;
             printf("Enter the size of the vector and matrix (n for n x n): ");
@@ -301,7 +300,7 @@ int main()
             free(b);
             free(result);
         }
-        else if (n == 2)
+        else if (n == 2) // Automatically fill
         {
             int size, i, j;
             printf("Enter the size of the vector and matrix (n for n x n): ");
