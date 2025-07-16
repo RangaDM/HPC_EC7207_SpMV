@@ -1,1 +1,5 @@
 .vscode/
+./Sequential/SqMV.exe
+./OpenMP/SqMV_OpenMP.exe
+./MPI/SqMV_MPI.exe
+./Hybrid\ MPI\ +\ OpenMP/SqMV_Hybrid.exe
